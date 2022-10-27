@@ -1,105 +1,85 @@
 # Android 
 基于Android studio 编译工具的开发
 基于移动设备开发大学生实验
-##### 实验五--广播实验
+##### 实验三--service实验
 
 
 
-# broadcast
+# RandomService
 
-## 动态注册和静态注册的区别
-
-##### 1.优先级动态广播的优先级比静态广播高
-
-##### 2.静态称为常驻型广播，程序关闭后收到消息也会被系统调用。
-
-#####     动态不是常驻型广播，也就是说广播跟随程序的生命周期
-
-##### 3.动态广播在代码里注册，而静态广播在AndroidManifest.xml中注册
-
-## 静态广播的注册
-
-### 1.静态广播需在==功能清单(manifests)==配置 
-
-![image-20221026211945746](F:\22 Summer\javaweb-复&提\picture\image-20221026211945746.png)
-
-#### enabled--->能否被实例化
-
-#### exported--->能否被其他app调用
-
-### 2.通过intent来传递给“绝对路径”的MyReceiver
-
-### 3.intent.putExtra来存储key 和value
-
-### 4.sendBroadcast(intent)来发送广播
+Handler是android提供更新UI的一套消息处理机制，主要作用有两个：
+1.在新启动的线程中发送消息
+2.在主线程中获取，处理消息
+https://www.ngui.cc/el/1226780.html?action=onClick
 
 
 
-## 动态广播
+## Activity 方法中
 
-### 1.动态广播与静态广播最大的不同在于动态广播不需要通过xml配置，而是通过代码来调用
+////////////////////////////////////
 
-### 2.正常声明生命一个类MyReceiver 来继承BroadcastReceiver 
+#### 1.定义一个activity 继承 activity
 
-### 3.动态代理需要执行的生命周期
+#### 2.定义layout组件的类型
 
-1. #### 注册动态广播
+​    textview button
 
-   - ##### 声明MyReceiver的对象
+#### 3.然后我们需要实现它的生命周期 onCreate  onDestroy
 
-   - ##### 注册广播需要调用类->IntentFilter (意图过滤器)声明对象filter
+#### 4.在初始化onCreate中 我们获取layout 中组件的id  
 
-   - ##### filter执行addAction来注册广播 -->后续intent通过setAction来调用同名action
+- num =(TextView)findViewById(R.id.count);
 
-   - ##### registerReceiver来注册广播
+- start = (Button) findViewById(R.id.button1);
 
-     - ###### myReceiver --->前面声明的MyReceiver对象
+- stop = (Button)findViewById(R.id.button2);
 
-     - ###### filter --->前面声明的意图过滤器
+#### 5.并且给按钮附加监听器 setOnClickListener 分别执行 开启service 和 关闭service
 
-2. #### 发送广播
+#### 6.因为我们这儿需要的是刷新页面数据 每2秒刷新随机数 所以需要开启线程 Runnable 匿名内部实现
 
-   - ##### 通过intent来发送广播 发送给前文addAction  --->所以可以直接写死同名action
+​    在run方法中 给textview赋值
 
-   - ##### intent.putExtra 传入相关 key value
+#### 7.创建handler 将 Runnable线程信息发送给在主线程中的handler执行
 
-   - ##### sendBroadcast 来发送广播
+#### 8.定义一个方法 UpdateCount 参数类型为 double 将值赋值给 activity的随机数randomNum
 
-3. #### 销毁广播
+--------------------------------------------------------------------
 
-   - ##### 通过unregisterReceiver来销毁myReceiver
+## Service 方法中
 
+\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+#### 1.先继承Service 
 
+#### 2.再实现其生命周期 
 
+######     1.OnCreate ---初始化
 
-## 有序广播（通过注册动态广播）
+######     2.onStartCommand ---开启行为
 
-#### 1.注册广播
+######     3.OnBind ---绑定
 
-- ##### 在此，我们需要注册三个广播来观察其顺序
+######     4.onDestroy ---销毁
 
-- ##### 所以需要创造三个MyRecceiver来继承BroadcastReceiver 分别定义 one two three
+#### 3.定义本service的线程为 workThread
 
-- ##### 各种继承onReceive 来输出不同的广播内容
+#### 4.本机线程的Runnable 定义其方法 
 
-- ##### 同样，需要定义 filter1,filter2,filter3
+######     条件(线程未被中断) { 即可以正常执行该线程 }
 
-- ##### 继续执行addAction  registerReceiver
+###### ----》执行主要方法(生成随机数)
 
-- ##### 在不同的filter中，需要设置各自的优先级(setPriority)  ---> 范围在-1000~1000
+###### ----》执行在Activity中的 UpdateCount方法 将随机数传送给前端页面
 
-### 2.发送广播 此时需要用sendOrderedBroadcast
+###### ----》线程睡眠时间为2秒{暂停两秒后继续线程} 此时需要捕获异常
 
-- ##### 传入两个参数
+#### 5.在初始化中 存储 Runnable
 
-  - ###### intent
+​    workThread = new Thread(null,backgroundWork,"WorkThread");
 
-  - ###### 相关权限 --receiverPermission
+#### 6.开启行为(onStartCommand)中 开启线程 (先判断线程是否执行完毕)
 
-
-
-
-
+当onStartCommand() 方法的返回值为常量START_NOT_STICKY 时,表明在 onStartCommand() 方法运行结束后,如果系统杀死了Service,系统就不会再重建这个 Service,除非有待处理意图投递给它。这样,Service 在意外中止后将停止运行。
 
 
