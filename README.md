@@ -3,6 +3,7 @@
 基于移动设备开发大学生实验
 ##### 实验三--service实验
 
+##### 随机数service 和 add函数
 
 
 # RandomService
